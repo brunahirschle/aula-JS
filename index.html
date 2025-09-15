@@ -6,79 +6,69 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Gerenciador de Notas</h1>
-    <div>
-    <input type="text" id="noteTitle" placeholder="Digite o título da nota" />
-    <button onclick="addNote()">Adicionar Nota</button>
-    </div>
-    <ul id="notesList"></ul>
+    <h1>Cadastro de Usuário</h1>
+
+    <form id="userForm">
+    <label for="name">Nome:</label>
+    <input type="text" id="name" />
+    <div class="error" id="error-name"></div>
+
+    <label for="username">Usuário:</label>
+    <input type="text" id="username" />
+    <div class="error" id="error-username"></div>
+
+    <label for="password">Senha:</label>
+    <input type="password" id="password" />
+    <div class="error" id="error-password"></div>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" />
+    <div class="error" id="error-email"></div>
+
+    <label for="age">Idade:</label>
+    <input type="number" id="age" min="0" />
+    <div class="error" id="error-age"></div>
+
+    <button type="submit">Cadastrar</button>
+    <div class="success" id="success-message"></div>
+    </form>
     
     <script>
-    window.onload = function () {
-        loadNotes();
-};
+    const form = document.getElementById("userForm");
 
-    function addNote() {
-    const input = document.getElementById('noteTitle');
-    const title = input.value.trim();
+    form.addEventListener("submit", function (e) {
+        e.preventDefault(); 
+        document.querySelectorAll(".error").forEach(el => el.textContent = "");
+        document.getElementById("success-message").textContent = "";
 
-    if (title === '') {
-    alert('O título da nota não pode estar vazio.');
-    return;
-    }
+        try {
+        const name = document.getElementById("name").value.trim();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const age = parseInt(document.getElementById("age").value.trim());
 
-    let notes = getNotes();
+        if (!name) throw { field: "name", message: "O nome é obrigatório." };
+        if (!username) throw { field: "username", message: "O usuário é obrigatório." };
+        if (!password) throw { field: "password", message: "A senha é obrigatória." };
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) throw { field: "email", message: "O email é obrigatório." };
+        if (!emailRegex.test(email)) throw { field: "email", message: "Email inválido." };
 
-    if (notes.some(note => note.title === title)) {
-    alert('Já existe uma nota com esse título.');
-    return;
-    }
+        if (isNaN(age)) throw { field: "age", message: "A idade é obrigatória." };
+        if (age < 18) throw { field: "age", message: "É necessário ter 18 anos ou mais." };
 
-    notes.push({ title });
-    saveNotes(notes);
-
-    input.value = '';
-    loadNotes();
-}
-
-
-    function removeNote(title) {
-        let notes = getNotes();
-        notes = notes.filter(note => note.title !== title);
-
-    saveNotes(notes);
-    loadNotes();
-}
-
-    function loadNotes() {
-    const notesList = document.getElementById('notesList');
-    const notes = getNotes();
-
-    notesList.innerHTML = '';
-
-    notes.forEach(note => {
-    const li = document.createElement('li');
-    li.textContent = note.title;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.textContent = 'Remover';
-    removeBtn.className = 'remove-btn';
-    removeBtn.onclick = () => removeNote(note.title);
-
-    li.appendChild(removeBtn);
-    notesList.appendChild(li);
+        document.getElementById("success-message").textContent = "Cadastro realizado com sucesso!";
+        form.reset();
+        } catch (error) {
+            if (error.field && error.message) {
+            document.getElementById(`error-${error.field}`).textContent = error.message;
+            } else {
+            alert("Ocorreu um erro inesperado.");
+            }
+        }
     });
-}
-
-    function getNotes() {
-        const notesJSON = localStorage.getItem('notas');
-        return notesJSON ? JSON.parse(notesJSON) : [];
-}
-
-    function saveNotes(notes) {
-        localStorage.setItem('notas', JSON.stringify(notes));
-}
 
     </script>
 
