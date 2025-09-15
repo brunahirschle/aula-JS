@@ -6,58 +6,80 @@
     <title>Document</title>
 </head>
 <body>
-    
-    <form id="formulario">
-        <input id="nome" type="text" placeholder="nome">
-        <input id="senha" type="password" placeholder="senha">
-        <input id="telefone" type="tel" placeholder="telefone">
-        <input id="data" type="date">
-        <input id="email" type="email" placeholder="email">
-        <button id="botao" type="submit">Enviar</button>
-    </form>
-
-    <button id="limpar">Limpar lista</button>
-
-    <div id="lista">
-        <h3>Dados enviados:</h3>
+    <h1>Gerenciador de Notas</h1>
+    <div>
+    <input type="text" id="noteTitle" placeholder="Digite o título da nota" />
+    <button onclick="addNote()">Adicionar Nota</button>
     </div>
-
+    <ul id="notesList"></ul>
+    
     <script>
-        let formu = document.getElementById('formulario');
-        const lista = document.getElementById('lista');
-        const botaoLimpar = document.getElementById('limpar');
+    window.onload = function () {
+        loadNotes();
+};
 
-        formu.addEventListener('submit', (event) => {
-            event.preventDefault()
+    function addNote() {
+    const input = document.getElementById('noteTitle');
+    const title = input.value.trim();
 
-        let nome = document.getElementById('nome').value.trim();
-        let senha = document.getElementById('senha').value.trim();
-        let telefone = document.getElementById('telefone').value.trim();
-        let data = document.getElementById('data').value.trim();
-        let email = document.getElementById('email').value.trim();
+    if (title === '') {
+    alert('O título da nota não pode estar vazio.');
+    return;
+    }
 
-        if (!nome || !senha || !telefone || !data || !email) {
-            console.error('Erro: campo não preenchido')
-            return;
-        } 
-        const item = document.createElement('div');
-            item.classList.add('item');
-            item.innerHTML = `
-                <p><strong>Nome:</strong> ${nome}</p>
-                <p><strong>Senha:</strong> ${senha}</p>
-                <p><strong>Telefone:</strong> ${telefone}</p>
-                <p><strong>Data de Nascimento:</strong> ${data}</p>
-                <p><strong>Email:</strong> ${email}</p>
-            `;
+    let notes = getNotes();
 
-            lista.appendChild(item);
 
-            formu.reset();
-        });
+    if (notes.some(note => note.title === title)) {
+    alert('Já existe uma nota com esse título.');
+    return;
+    }
 
-        botaoLimpar.addEventListener('click', () => {
-            lista.innerHTML = '<h3>Dados enviados:</h3>';
-        });
+    notes.push({ title });
+    saveNotes(notes);
+
+    input.value = '';
+    loadNotes();
+}
+
+
+    function removeNote(title) {
+        let notes = getNotes();
+        notes = notes.filter(note => note.title !== title);
+
+    saveNotes(notes);
+    loadNotes();
+}
+
+    function loadNotes() {
+    const notesList = document.getElementById('notesList');
+    const notes = getNotes();
+
+    notesList.innerHTML = '';
+
+    notes.forEach(note => {
+    const li = document.createElement('li');
+    li.textContent = note.title;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Remover';
+    removeBtn.className = 'remove-btn';
+    removeBtn.onclick = () => removeNote(note.title);
+
+    li.appendChild(removeBtn);
+    notesList.appendChild(li);
+    });
+}
+
+    function getNotes() {
+        const notesJSON = localStorage.getItem('notas');
+        return notesJSON ? JSON.parse(notesJSON) : [];
+}
+
+    function saveNotes(notes) {
+        localStorage.setItem('notas', JSON.stringify(notes));
+}
+
     </script>
 
     
